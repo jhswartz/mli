@@ -1,0 +1,182 @@
+MACHINE LANGUAGE INTERPRETER
+
+  Run machine code executables without an object file format.
+
+
+USAGE
+
+  mli PROGRAM [ARGUMENTS]
+
+    The machine language interpreter maps the contents of a
+    PROGRAM file into memory and calls the procedure at offset 0.
+
+
+BUILD
+
+  encode behaves somewhat like a primitive assembler that doesn't
+  understand instruction mnemonics.
+
+  shelf generates an ELF executable that contains a .text section
+  of the machine code produced by encode, as we need the interpreter
+  wrapped in an object format that is recognized by the system.
+
+  $ tools/encode < src/mli.src > src/mli.raw
+  $ tools/shelf tools/plan src/mli.raw > bin/mli
+  $ chmod 755 bin/mli
+  $ ls -al bin/mli
+  -rwxr-xr-x 1 user user 4096 Aug 26 05:08 bin/mli
+
+
+INSTALLATION
+
+  # cp -a bin/mli /bin/mli 
+  # mount -t binfmt_misc none /proc/sys/fs/binfmt_misc
+  # cat misc/binfmt/x86_64 > /proc/sys/fs/binfmt_misc/register
+  # cat /proc/sys/fs/binfmt_misc/mli-x86_64
+  enabled
+  flags:
+  offset 0
+  magic 90
+
+
+DEMO
+
+  This is an example of how to produce a simple implementation of
+  the sleep utility for Linux/x86_64.
+
+  $ cat demo/src/sleep.src
+  Magic:
+  	90				# nop
+  
+  Start:
+  	# Abort if argc is not 2.
+  	59				# pop %rcx
+  	48 83 f9 02			# cmp $2, %rcx
+  	75 [ rel8 Abort ]		# jnz Abort
+  
+  	# Clear the counting registers.
+  	48 31 c0			# xor %rax, %rax
+  	48 31 c9			# xor %rcx, %rcx
+  
+  	# Parse argv[1].
+  	48 83 c4 08			# add $8, %rsp
+  	5e				# pop %rsi
+  
+  ParseSeconds:
+  	# Read the next character.
+  	ac				# lodsb
+  
+  	# NUL terminator?
+  	84 c0				# test %al, %al
+  	74 [ rel8 Sleep ]		# jz Sleep
+  
+  	# Abort if it's not a digit.
+  	3c 30				# cmp $'0', %al
+  	7c [ rel8 Abort ]		# jl Abort
+  	3c 39				# cmp $'9', %al
+  	7f [ rel8 Abort ]		# jg Abort
+  
+  	# Accumulate.
+  	2c 30				# sub $0x30, %al
+  	48 6b c9 0a			# imul $10, %rcx
+  	48 01 c1			# add %rax, %rcx
+  
+  	# Continue.
+  	eb [ rel8 ParseSeconds ]	# jmp ParseSeconds
+  
+  Sleep:
+  	# Chuck the seconds into a request.
+  	48 8d 3d [ rel32 Request ]	# lea Request(%rip), %rdi
+  	48 89 0f			# mov %rcx, (%rdi)
+  
+  	# nanosleep(&Request, NULL);
+  	48 31 f6			# xor %rsi, %rsi
+  	6a 23				# push $SYS_NANOSLEEP
+  	58				# pop %rax
+  	0f 05				# syscall
+  
+  Quit:
+  	6a 00				# push $EXIT_SUCCESS
+  	eb [ rel8 Exit ]		# jmp Exit
+  
+  Abort:
+  	6a 01				# push $EXIT_FAILURE
+  
+  Exit:
+  	5f				# pop %rdi
+  	6a 3c				# push $SYS_EXIT
+  	58				# pop %rax
+  	0f 05				# syscall
+  	
+  Request:
+
+
+  $ tools/encode < demo/src/sleep.src > demo/bin/sleep
+  $ chmod u+x demo/bin/sleep
+
+  $ ls -al demo/bin/sleep
+  -rwxr-xr-x 1 user user 73 Aug 26 04:57 demo/bin/sleep
+
+  $ strace demo/bin/sleep 2
+  execve("demo/bin/sleep", ["demo/bin/sleep", "2"], 0x7fff06140308 /* 41 vars */) = 0
+  open("demo/bin/sleep", O_RDONLY)        = 3
+  fstat(3, {st_mode=S_IFREG|0755, st_size=73, ...}) = 0
+  mmap(NULL, 73, PROT_READ|PROT_WRITE|PROT_EXEC, MAP_PRIVATE, 3, 0) = 0x7f102845a000
+  nanosleep({tv_sec=2, tv_nsec=0}, NULL)  = 0
+  exit(0)                                 = ?
+  +++ exited with 0 +++
+
+
+DEBUGGING
+
+  gdb won't play with us unless we point it at the interpreter,
+  so here's an example of how to get to sleep:
+
+  $ gdb -q --args bin/mli demo/bin/sleep 1
+  Reading symbols from bin/mli...
+  (No debugging symbols found in bin/mli)
+
+  (gdb) b *0x40000800
+  Breakpoint 1 at 0x40000800
+
+  (gdb) b *0x4000085b
+  Breakpoint 2 at 0x4000085b
+
+  (gdb) display/4i $pc
+  1: x/4i $pc
+  <error: No registers.>
+
+  (gdb) r
+  Breakpoint 1, 0x0000000040000800 in ?? ()
+  1: x/4i $pc
+  => 0x40000800:  pop    %rcx
+     0x40000801:  dec    %rcx
+     0x40000804:  cmp    $0x1,%rcx
+     0x40000808:  jl     0x4000085d
+
+  (gdb) c
+  Breakpoint 2, 0x000000004000085b in ?? () 
+  1: x/4i $pc
+  => 0x4000085b:  jmp    *%rax
+     0x4000085d:  push   $0x1
+     0x4000085f:  pop    %rdi
+     0x40000860:  push   $0x3c
+
+  (gdb) stepi
+  0x00007ffff7ff8000 in ?? ()
+  1: x/4i $pc
+  => 0x7ffff7ff8000:      nop
+     0x7ffff7ff8001:      pop    %rcx
+     0x7ffff7ff8002:      cmp    $0x2,%rcx
+     0x7ffff7ff8006:      jne    0x7ffff7ff8041
+
+ 
+SEE ALSO
+
+  https://github.com/jhswartz/mlx
+  https://github.com/jhswartz/shelf 
+
+
+AUTHOR
+
+  Justin Swartz <justin.swartz@risingedge.co.za>
