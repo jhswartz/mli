@@ -14,7 +14,8 @@ USAGE
 BUILD
 
   encode behaves somewhat like a primitive assembler that doesn't
-  understand instruction mnemonics.
+  understand instruction mnemonics, but gives you the ability to
+  define and expand macros instead.
 
   shelf generates an ELF executable that contains a .text section
   of the machine code produced by encode, as we need the interpreter
