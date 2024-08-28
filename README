@@ -44,84 +44,17 @@ DEMO
   This is an example of how to produce a simple implementation of
   the sleep utility for Linux/x86_64.
 
-  $ cat demo/src/sleep.src
-  Magic:
-  	90				# nop
-  
-  Start:
-  	# Abort if argc is not 2.
-  	59				# pop %rcx
-  	48 83 f9 02			# cmp $2, %rcx
-  	75 [ rel8 Abort ]		# jnz Abort
-  
-  	# Clear the counting registers.
-  	48 31 c0			# xor %rax, %rax
-  	48 31 c9			# xor %rcx, %rcx
-  
-  	# Parse argv[1].
-  	48 83 c4 08			# add $8, %rsp
-  	5e				# pop %rsi
-  
-  ParseSeconds:
-  	# Read the next character.
-  	ac				# lodsb
-  
-  	# NUL terminator?
-  	84 c0				# test %al, %al
-  	74 [ rel8 Sleep ]		# jz Sleep
-  
-  	# Abort if it's not a digit.
-  	3c 30				# cmp $'0', %al
-  	7c [ rel8 Abort ]		# jl Abort
-  	3c 39				# cmp $'9', %al
-  	7f [ rel8 Abort ]		# jg Abort
-  
-  	# Accumulate.
-  	2c 30				# sub $0x30, %al
-  	48 6b c9 0a			# imul $10, %rcx
-  	48 01 c1			# add %rax, %rcx
-  
-  	# Continue.
-  	eb [ rel8 ParseSeconds ]	# jmp ParseSeconds
-  
-  Sleep:
-  	# Chuck the seconds into a request.
-  	48 8d 3d [ rel32 Request ]	# lea Request(%rip), %rdi
-  	48 89 0f			# mov %rcx, (%rdi)
-  
-  	# nanosleep(&Request, NULL);
-  	48 31 f6			# xor %rsi, %rsi
-  	6a 23				# push $SYS_NANOSLEEP
-  	58				# pop %rax
-  	0f 05				# syscall
-  
-  Quit:
-  	6a 00				# push $EXIT_SUCCESS
-  	eb [ rel8 Exit ]		# jmp Exit
-  
-  Abort:
-  	6a 01				# push $EXIT_FAILURE
-  
-  Exit:
-  	5f				# pop %rdi
-  	6a 3c				# push $SYS_EXIT
-  	58				# pop %rax
-  	0f 05				# syscall
-  	
-  Request:
-
-
   $ tools/encode < demo/src/sleep.src > demo/bin/sleep
   $ chmod u+x demo/bin/sleep
 
   $ ls -al demo/bin/sleep
-  -rwxr-xr-x 1 user user 73 Aug 26 04:57 demo/bin/sleep
+  -rwxr-xr-x 1 user user 70 Aug 27 19:49 demo/bin/sleep
 
   $ strace demo/bin/sleep 2
-  execve("demo/bin/sleep", ["demo/bin/sleep", "2"], 0x7fff06140308 /* 41 vars */) = 0
+  execve("demo/bin/sleep", ["demo/bin/sleep", "2"], 0x7fffa41c9a88 /* 41 vars */) = 0
   open("demo/bin/sleep", O_RDONLY)        = 3
-  fstat(3, {st_mode=S_IFREG|0755, st_size=73, ...}) = 0
-  mmap(NULL, 73, PROT_READ|PROT_WRITE|PROT_EXEC, MAP_PRIVATE, 3, 0) = 0x7f102845a000
+  fstat(3, {st_mode=S_IFREG|0755, st_size=70, ...}) = 0
+  mmap(NULL, 70, PROT_READ|PROT_WRITE|PROT_EXEC, MAP_PRIVATE, 3, 0) = 0x7f9700d5f000
   nanosleep({tv_sec=2, tv_nsec=0}, NULL)  = 0
   exit(0)                                 = ?
   +++ exited with 0 +++
