@@ -188,7 +188,7 @@ evaluate()
 
 encode()
 {
-	MACROS="rel8 rel32"
+	MACROS="rel8 rel32 macro"
 
 	PASS=1
 	OFFSET=0
