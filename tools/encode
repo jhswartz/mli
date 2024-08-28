@@ -42,36 +42,6 @@ u32()
 	done
 }
 
-rel8()
-{
-	local target=$(resolve $1)
-	local delta=
-	
-	if [ $((target)) -gt $OFFSET ]
-	then
-		delta=$((target - OFFSET - 1))
-	else
-		delta=$((-(OFFSET - target + 1)))
-	fi
-
-	u8 $((delta & 0xff))
-}
-
-rel32()
-{
-	local target=$(resolve $1)
-	local delta=
-	
-	if [ $((target)) -gt $OFFSET ]
-	then
-		delta=$((target - OFFSET - 4))
-	else
-		delta=$((-(OFFSET - target + 4)))
-	fi
-
-	u32 $((delta & 0xffffffff))
-}
-
 resolve()
 {
 	if [ $PASS -eq 1 ]
@@ -189,7 +159,7 @@ evaluate()
 
 encode()
 {
-	MACROS="rel8 rel32 macro"
+	MACROS="macro ."
 	PASS=1
 	OFFSET=0
 	MODE=$ENCODE
@@ -200,7 +170,7 @@ encode()
 		evaluate $line
 	done
 
-	MACROS="rel8 rel32 macro"
+	MACROS="macro ."
 	PASS=2
 	OFFSET=0
 	MODE=$ENCODE

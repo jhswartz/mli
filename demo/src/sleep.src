@@ -1,3 +1,5 @@
+[ . misc/macro/isa/x86_64 ]
+
 Magic:
 	90				# nop
 
