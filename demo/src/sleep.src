@@ -11,8 +11,8 @@ Start:
 	48 31 c0			# xor %rax, %rax
 	48 31 c9			# xor %rcx, %rcx
 
-	# Parse argv[1].
-	48 83 c4 08			# add $8, %rsp
+	# Skip argv[0] and parse argv[1].
+	5e				# pop %rsi
 	5e				# pop %rsi
 
 ParseSeconds:
