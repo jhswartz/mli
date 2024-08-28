@@ -105,23 +105,43 @@ label()
 	LABELS="$1 $OFFSET ${LABELS}"
 }
 
+macro()
+{
+	local token=$1
+	shift 1
+	MACROS="$token $MACROS"
+	eval "${token}() { $@; }"
+}
+
+callable()
+{
+	local token=$1
+
+	set -- $MACROS
+
+	for macro
+	do
+		if [ $macro = $token ]
+		then
+			return 0
+		fi
+	done
+
+	return 1
+}
+
 interpret()
 {
 	local token=$1
 	shift 1
 
-	case $token in
-	"rel8")
-		rel8 $@
-		;;
-	"rel32")
-		rel32 $@
-		;;
-	*)
+	if ! callable $token
+	then
 		error "unrecognized token"
 		exit 1
-		;;
-	esac
+	fi
+
+	$token $@
 }
 
 evaluate()
@@ -168,6 +188,8 @@ evaluate()
 
 encode()
 {
+	MACROS="rel8 rel32"
+
 	PASS=1
 	OFFSET=0
 	MODE=$ENCODE
