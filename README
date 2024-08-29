@@ -13,15 +13,17 @@ USAGE
 
 BUILD
 
-  encode behaves somewhat like a primitive assembler that doesn't
-  understand instruction mnemonics, but gives you the ability to
-  define and expand macros instead.
+  mle (copied from https://github.com/jhswartz/mle) behaves
+  somewhat like a primitive assembler that doesn't understand
+  instruction mnemonics, but gives you the ability to define and
+  expand macros instead.
 
-  shelf generates an ELF executable that contains a .text section
-  of the machine code produced by encode, as we need the interpreter
-  wrapped in an object format that is recognized by the system.
+  shelf (copied from https://github.com/jhswartz/shelf) generates
+  an ELF executable that contains a .text section of the machine
+  code produced by mle, as we need the interpreter wrapped in
+  an object format that is recognized by the system.
 
-  $ tools/encode < src/mli.src > src/mli.raw
+  $ tools/mle < src/mli.src > src/mli.raw
   $ tools/shelf tools/plan src/mli.raw > bin/mli
   $ chmod 755 bin/mli
   $ ls -al bin/mli
@@ -45,7 +47,7 @@ DEMO
   This is an example of how to produce a simple implementation of
   the sleep utility for Linux/x86_64.
 
-  $ tools/encode < demo/src/sleep.src > demo/bin/sleep
+  $ tools/mle < demo/src/sleep.src > demo/bin/sleep
   $ chmod u+x demo/bin/sleep
 
   $ ls -al demo/bin/sleep
@@ -107,8 +109,12 @@ DEBUGGING
  
 SEE ALSO
 
-  https://github.com/jhswartz/mlx
-  https://github.com/jhswartz/shelf 
+  ACCOMPLICES
+    https://githib.com/jhswartz/mle
+    https://github.com/jhswartz/shelf
+
+  SIBLING
+    https://github.com/jhswartz/mlx
 
 
 AUTHOR
