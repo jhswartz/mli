@@ -1,4 +1,4 @@
-[ . misc/macro/isa/x86_64 ]
+[ . misc/macro/isa/amd64 ]
 
 Magic:
 	90				# nop

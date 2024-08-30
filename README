@@ -34,8 +34,8 @@ INSTALLATION
 
   # cp -a bin/mli /bin/mli 
   # mount -t binfmt_misc none /proc/sys/fs/binfmt_misc
-  # cat misc/binfmt/x86_64 > /proc/sys/fs/binfmt_misc/register
-  # cat /proc/sys/fs/binfmt_misc/mli-x86_64
+  # cat misc/binfmt/amd64 > /proc/sys/fs/binfmt_misc/register
+  # cat /proc/sys/fs/binfmt_misc/mli-amd64
   enabled
   flags:
   offset 0
@@ -45,7 +45,7 @@ INSTALLATION
 DEMO
 
   This is an example of how to produce a simple implementation of
-  the sleep utility for Linux/x86_64.
+  the sleep utility for Linux/amd64.
 
   $ tools/mle < demo/src/sleep.src > demo/bin/sleep
   $ chmod u+x demo/bin/sleep
