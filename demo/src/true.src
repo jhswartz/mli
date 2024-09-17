@@ -1,0 +1,11 @@
+[ . misc/macro/isa/amd64 ]
+
+Magic:
+	90				# nop
+
+Start:
+	6a 00				# push $EXIT_SUCCESS
+	5f				# pop %rdi
+	6a 3c				# push $SYS_EXIT
+	58				# pop %rax
+	0f 05				# syscall
