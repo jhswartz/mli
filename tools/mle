@@ -5,7 +5,7 @@ INTERPRET=1
 
 error()
 {
-	printf "${OFFSET}: %s\n" "$1" >&2
+	printf "%08x: %s\n" ${OFFSET} "$1" >&2
 }
 
 byte()
@@ -26,7 +26,7 @@ u8()
 	done
 }
 
-u16()
+u16le()
 {
 	for value
 	do
@@ -34,11 +34,43 @@ u16()
 	done
 }
 
-u32()
+u16be()
 {
 	for value
 	do
-		u16 $value $((value >> 16))
+		u8 $((value >> 8)) $value
+	done
+}
+
+u32le()
+{
+	for value
+	do
+		u16le $value $((value >> 16))
+	done
+}
+
+u32be()
+{
+	for value
+	do
+		u16be $((value >> 16)) $value
+	done
+}
+
+u64le()
+{
+	for value
+	do
+		u32le $value $((value >> 32))
+	done
+}
+
+u64be()
+{
+	for value
+	do
+		u32be $((value >> 32)) $value
 	done
 }
 
@@ -108,7 +140,7 @@ interpret()
 
 	if ! callable $token
 	then
-		error "unrecognized token"
+		error "unrecognized token: $token"
 		exit 1
 	fi
 
