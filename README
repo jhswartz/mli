@@ -42,25 +42,31 @@ INSTALLATION
   magic 90
 
 
-DEMO
+DEMONSTRATION
 
-  This is an example of how to produce a simple implementation of
-  the sleep utility for Linux/amd64.
+  This is an example of assembling a simple implementation of
+  the kill utility for Linux/amd64.
 
-  $ tools/mle < demo/src/sleep.src > demo/bin/sleep
-  $ chmod u+x demo/bin/sleep
+  $ tools/mle < demo/src/kill.src > demo/bin/kill
+  $ chmod u+x demo/bin/kill
 
-  $ ls -al demo/bin/sleep
-  -rwxr-xr-x 1 user user 70 Aug 27 19:49 demo/bin/sleep
+  $ ls -al demo/bin/kill
+  -rwxr-xr-x 1 user user 107 Sep 17 03:31 demo/bin/kill
 
-  $ strace demo/bin/sleep 2
-  execve("demo/bin/sleep", ["demo/bin/sleep", "2"], 0x7fffa41c9a88 /* 41 vars */) = 0
-  open("demo/bin/sleep", O_RDONLY)        = 3
-  fstat(3, {st_mode=S_IFREG|0755, st_size=70, ...}) = 0
-  mmap(NULL, 70, PROT_READ|PROT_WRITE|PROT_EXEC, MAP_PRIVATE, 3, 0) = 0x7f9700d5f000
-  nanosleep({tv_sec=2, tv_nsec=0}, NULL)  = 0
-  exit(0)                                 = ?
-  +++ exited with 0 +++
+  $ strace demo/bin/kill -15 1 2 3 4 0
+  execve("demo/bin/kill", ["demo/bin/kill", "-15", "1", "2", "3", "4", "0"], 0x7ffdf65d2950 /* 38 vars */) = 0
+  open("demo/bin/kill", O_RDONLY)         = 3
+  fstat(3, {st_mode=S_IFREG|0755, st_size=107, ...}) = 0
+  mmap(NULL, 107, PROT_READ|PROT_WRITE|PROT_EXEC, MAP_PRIVATE, 3, 0) = 0x7f73a97a2000
+  kill(1, SIGTERM)                        = -1 EPERM (Operation not permitted)
+  kill(2, SIGTERM)                        = -1 EPERM (Operation not permitted)
+  kill(3, SIGTERM)                        = -1 EPERM (Operation not permitted)
+  kill(4, SIGTERM)                        = -1 EPERM (Operation not permitted)
+  kill(0, SIGTERM)                        = 0
+  strace: Process 31999 detached
+  Terminated
+
+  See demo/src/*.src for more examples.
 
 
 DEBUGGING
