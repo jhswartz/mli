@@ -26,7 +26,7 @@ INSTALLATION
 
 USAGE
 
-  $ tools/mle < demo/src/kill.src > demo/bin/kill
+  $ mle < demo/src/kill.src > demo/bin/kill
   $ chmod u+x demo/bin/kill
 
   $ ls -al demo/bin/kill
