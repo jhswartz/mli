@@ -1,6 +1,0 @@
-define()
-{
-	eval $1=$2
-}
-
-MACROS="define $MACROS"
