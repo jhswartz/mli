@@ -1,29 +1,11 @@
-MACHINE LANGUAGE INTERPRETER
+MACHINE LANGUAGE INTERPRETER / AMD64
 
-  Run machine code executables without an object file format.
-
-
-USAGE
-
-  mli PROGRAM [ARGUMENTS]
-
-    The machine language interpreter maps the contents of a
-    PROGRAM file into memory and calls the procedure at offset 0.
+  Run amd64 machine code executables without an object file format.
 
 
 BUILD
 
-  mle (copied from https://github.com/jhswartz/mle) behaves
-  somewhat like a primitive assembler that doesn't understand
-  instruction mnemonics, but gives you the ability to define and
-  expand macros instead.
-
-  shelf (copied from https://github.com/jhswartz/shelf) generates
-  an ELF executable that contains a .text section of the machine
-  code produced by mle, as we need the interpreter wrapped in
-  an object format that is recognized by the system.
-
-  $ tools/mle < src/mli.src > src/mli.raw
+  $ mle < src/mli.src > src/mli.raw
   $ tools/shelf tools/plan src/mli.raw > bin/mli
   $ chmod 755 bin/mli
   $ ls -al bin/mli
@@ -34,7 +16,7 @@ INSTALLATION
 
   # cp -a bin/mli /bin/mli 
   # mount -t binfmt_misc none /proc/sys/fs/binfmt_misc
-  # cat misc/binfmt/amd64 > /proc/sys/fs/binfmt_misc/register
+  # cat misc/binfmt/mli-amd64 > /proc/sys/fs/binfmt_misc/register
   # cat /proc/sys/fs/binfmt_misc/mli-amd64
   enabled
   flags:
@@ -42,16 +24,13 @@ INSTALLATION
   magic 90
 
 
-DEMONSTRATION
-
-  This is an example of assembling a simple implementation of
-  the kill utility for Linux/amd64.
+USAGE
 
   $ tools/mle < demo/src/kill.src > demo/bin/kill
   $ chmod u+x demo/bin/kill
 
   $ ls -al demo/bin/kill
-  -rwxr-xr-x 1 user user 107 Sep 17 03:31 demo/bin/kill
+  -rwxr-xr-x 1 user user 107 Oct 15 14:43 demo/bin/kill
 
   $ strace demo/bin/kill -15 1 2 3 4 0
   execve("demo/bin/kill", ["demo/bin/kill", "-15", "1", "2", "3", "4", "0"], 0x7ffdf65d2950 /* 38 vars */) = 0
@@ -66,13 +45,8 @@ DEMONSTRATION
   strace: Process 31999 detached
   Terminated
 
-  See demo/src/*.src for more examples.
-
 
 DEBUGGING
-
-  gdb won't play with us unless we point it at the interpreter,
-  so here's an example of how to get to sleep:
 
   $ gdb -q --args bin/mli demo/bin/sleep 1
   Reading symbols from bin/mli...
@@ -115,12 +89,9 @@ DEBUGGING
  
 SEE ALSO
 
-  ACCOMPLICES
-    https://github.com/jhswartz/mle
-    https://github.com/jhswartz/shelf
-
-  SIBLING
-    https://github.com/jhswartz/mlx
+  https://github.com/jhswartz/shelf
+  https://github.com/jhswartz/mle
+  https://github.com/jhswartz/mlx
 
 
 AUTHOR
