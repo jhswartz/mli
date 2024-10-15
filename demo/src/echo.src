@@ -1,28 +1,29 @@
-[ . misc/macro/isa/amd64/core ]
+[ . x86 ]
 
 Magic:
-	90					# nop
+	90
 
 Start:
 	# Quit if argc is less than or equal to 1.
-	59					# pop %rcx
-	48 83 f9 01				# cmp $1, %rcx
+	59					# pop rcx
+	48 83 f9 01				# cmp 1 rcx
 	7e [ rel8 Quit ]			# jle Quit
 
 	# Skip argv[0].
-	5e					# pop %rsi
+	5e					# pop rsi
 
 Echo:
 	# Quit if the next argument is NULL.
-	5e					# pop %rsi
-	48 85 f6				# test %rsi, %rsi
+	5e					# pop rsi
+	48 85 f6				# test rsi rsi
 	7e [ rel8 Quit ]			# jz Quit
 
 	# Otherwise, print it.
 	e8 [ rel32 PrintString ]		# call PrintString
 
 	# Print the separator.
-	48 8d 35 [ rel32 Separator ]		# lea Separator(%rip), %rsi
+	6a 01 5a				# mov 1 rdx
+	48 8d 35 [ rel32 Separator ]		# lear Separator rsi
 	e8 [ rel32 Print ]			# call Print
 
 	# Continue.
@@ -30,38 +31,35 @@ Echo:
 
 PrintString:
 	# Get the length of the string.
-	48 89 f7				# mov %rsi, %rdi
-	48 31 c0				# xor %rax, %rax
-	48 31 c9				# xor %rcx, %rcx
-	48 ff c9				# dec %rcx
+	48 89 f7				# mov rsi rdi
+	48 31 c0				# xor rax rax
+	48 31 c9				# xor rcx rcx
+	48 ff c9				# dec rcx
 	f2 ae					# repnz scasb
-	48 89 ca				# mov %rdx, %rcx
-	48 f7 d2				# not %rdx
-	48 ff ca				# dec %rdx
+	48 89 ca				# mov rdx, rcx
+	48 f7 d2				# not rdx
+	48 ff ca				# dec rdx
 
 Print:
-	# write(STDOUT_FILENO, buffer, length);
-	6a 01					# push $STDOUT_FILENO
-	5f					# pop %rdi
-	6a 01					# push $SYS_WRITE
-	58					# pop %rax
+	# write(STDOUT_FILENO, buffer, length)
+	6a 01 5f				# mov STDOUT_FILENO rdi
+	6a 01 58				# mov SYS_WRITE rax
 	0f 05					# syscall
 	c3					# ret
 
 Quit:
 	# Print the terminator.
-	48 8d 35 [ rel32 Terminator ]		# lea Terminator(%rip),	%rsi
+	6a 01 5a				# mov 1 rdx
+	48 8d 35 [ rel32 Terminator ]		# lear Terminator rsi
 	e8 [ rel32 Print ]			# call Print
 
 	# Exit.
-	6a 00					# push $EXIT_SUCCESS
-	5f					# pop %rdi
-	6a 3c					# push $SYS_EXIT
-	58					# pop %rax
+	6a 00 5f				# mov EXIT_SUCCESS rdi
+	6a 3c 58				# mov SYS_EXIT rax
 	0f 05					# syscall
 
 Separator:
-	20					# .ascii " "
+	20
 
 Terminator:
-	0a					# .ascii "\n"
+	0a

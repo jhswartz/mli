@@ -1,47 +1,40 @@
-[ . misc/macro/isa/amd64/core ]
-
 Magic:
-	90				# nop
+	90
 
 Start:
 	# Allocate 2048 bytes on the stack.
-	48 31 f6			# xor %rsi, %rsi
-	66 be 00 08			# mov $2048, %si
-	48 29 f4			# sub %rsi, %rsp
+	48 31 f6				# xor rsi rsi
+	66 be 00 08				# mov 2048 si
+	48 29 f4				# sub rsi rsp
 
-	# getcwd(buffer, 2048);
-	48 89 e7			# mov %rsp, %rdi
-	6a 4f				# push SYS_GETCWD
-	58				# pop %rax
-	0f 05				# syscall
+	# getcwd(buffer, 2048)
+	48 89 e7				# mov rsp, rdi
+	6a 4f 58				# mov SYS_GETCWD rax
+	0f 05					# syscall
 
 	# Get the buffered string length.
-	48 31 c0			# xor %rax, %rax
-	48 31 c9			# xor %rcx, %rcx
-	48 ff c9			# dec %rcx
-	f2 ae				# repnz scasb
-	48 89 ca			# mov %rdx, %rcx
-	48 f7 d2			# not %rdx
+	48 31 c0				# xor rax, rax
+	48 31 c9				# xor rcx, rcx
+	48 ff c9				# dec rcx
+	f2 ae					# repnz scasb
+	48 89 ca				# mov rdx rcx
+	48 f7 d2				# not rdx
 
-	# Replace the NUL terminator with NL.
-	48 ff cf			# dec %rdi
-	b0 0a				# mov $'\n', %al
-	88 07				# mov %al, (rdi)
+	# Replace the NUL terminator wit	h NL.
+	48 ff cf				# dec rdi
+	b0 0a					# mov '\n' al
+	88 07					# mov al (rdi)
 
 	# write(STDOUT_FILENO, buffer, strlen(buffer))
-	48 89 e6			# mov %rsp, %rsi
-	6a 01				# push $STDOUT_FILENO
-	5f				# pop %rdi
-	6a 01				# push $SYS_WRITE
-	58				# pop %rax
-	0f 05				# syscall
+	48 89 e6				# mov rsp rsi
+	6a 01 5f				# mov STDOUT_FILENO rdi
+	6a 01 58				# mov SYS_WRITE rax
+	0f 05					# syscall
 
 	# Deallocate the buffer.
-	66 81 c4 00 08			# add $2048, %sp
+	66 81 c4 00 08				# add 2048 sp
 
-	# exit(EXIT_SUCCESS);
-	6a 00				# push $EXIT_SUCCESS
-	5f				# pop %rdi
-	6a 3c				# push $SYS_EXIT
-	58				# pop %rax
-	0f 05				# syscall
+	# exit(EXIT_SUCCESS)
+	6a 00 5f				# mov EXIT_SUCCESS rdi
+	6a 3c 58				# mov SYS_EXIT rax
+	0f 05					# syscall

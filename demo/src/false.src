@@ -1,11 +1,8 @@
-[ . misc/macro/isa/amd64/core ]
-
 Magic:
-	90				# nop
+	90
 
 Start:
-	6a 01				# push $EXIT_FAILURE
-	5f				# pop %rdi
-	6a 3c				# push $SYS_EXIT
-	58				# pop %rax
+	# exit(EXIT_FAILURE)
+	6a 01 5f			# mov EXIT_FAILURE rdi
+	6a 3c 58			# mov SYS_EXIT rax
 	0f 05				# syscall

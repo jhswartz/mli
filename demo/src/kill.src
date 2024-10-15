@@ -1,42 +1,42 @@
-[ . misc/macro/isa/amd64/core ]
+[ . x86 ]
 
 Magic:
-	90					# nop
+	90
 
 Start:
 	# Gather argc and argv.
-	41 58					# pop %r8
-	41 59					# pop %r9
+	41 58					# pop r8
+	41 59					# pop r9
 
 	# Abort if argc is less than 3.
-	49 83 f9 03				# cmp $3, %r8
+	49 83 f9 03				# cmp 3, r8
 	7c [ rel8 Abort ]			# jl Abort
 
 	# Clear signal number and pid registers.
-	4d 31 d2				# xor %r10, %r10
-	4d 31 db				# xor %r11, %r11
+	4d 31 d2				# xor r10 r10
+	4d 31 db				# xor r11 r11
 
 Parse:
 	# Decrement argc, and exit if it's 0.
-	49 ff c8				# dec %r8
+	49 ff c8				# dec r8
 	74 [ rel8 Quit ]			# jz Quit
 
 	# Clear the counting registers.
-	48 31 c0				# xor %rax, %rax
-	48 31 c9				# xor %rcx, %rcx
+	48 31 c0				# xor rax rax
+	48 31 c9				# xor rcx rcx
 
 	# Parse the next argument.
-	5e					# pop %rsi
+	5e					# pop rsi
 
 	# Is it a signal number?
 	ac					# lodsb
-	3c 2d					# cmp $'-', %al
+	3c 2d					# cmp '-' al
 	74 [ rel8 ParseSignalNumber ]		# je ParseSignalNumber
 
 ParseProcessID:
 	# Gather a process identifier.
 	e8 [ rel32 ParseNumber ]		# call ParseNumber
-	49 89 cb				# mov %rcx, %r11
+	49 89 cb				# mov rcx r11
 
 	# Kill process, and continue parsing.
 	e8 [ rel32 Kill ]			# call Kill
@@ -45,7 +45,7 @@ ParseProcessID:
 ParseSignalNumber:
 	# Gather the signal number.
 	e8 [ rel32 ParseNextDigit ]		# call ParseNextDigit
-	49 89 ca				# mov %rcx, %r10
+	49 89 ca				# mov rcx r10
 
 	# Continue parsing.
 	eb [ rel8 Parse ]			# jmp Parse
@@ -56,45 +56,43 @@ ParseNextDigit:
 
 ParseNumber:
 	# NUL terminator?
-	84 c0					# test %al, %al
+	84 c0					# test al al
 	74 [ rel8 Return ]			# jz Return
 
 	# Abort if not a digit.
-	3c 30					# cmp $'0', %al
+	3c 30					# cmp '0' al
 	7c [ rel8 Abort ]			# jl Abort
-	3c 39					# cmp $'9', %al
+	3c 39					# cmp '9' al
 	7f [ rel8 Abort ]			# jg Abort
 
 	# Accumulate.
-	2c 30					# sub $'0', %al
-	48 6b c9 0a				# imul $10, %rcx
-	48 01 c1				# add %rax, %rcx
+	2c 30					# sub '0' al
+	48 6b c9 0a				# imul 10 rcx
+	48 01 c1				# add rax rcx
 
 	# Continue.
 	eb [ rel8 ParseNextDigit ]		# jmp ParseNextDigit
 
 Kill:
-	# kill(pid, signal);
-	4c 89 d6				# mov %r10, %rsi
-	4c 89 df				# mov %r11, %rdi
-	6a 3e					# push $SYS_KILL
-	58					# pop %rax
+	# kill(pid, signal)
+	4c 89 d6				# mov r10 rsi
+	4c 89 df				# mov r11 rdi
+	6a 3e 58				# mov SYS_KILL rax
 	0f 05					# syscall
 
 Return:
 	c3					# ret
 
 Quit:
-	# exit(EXIT_SUCCESS);
-	6a 00					# push $EXIT_SUCCESS
+	# exit(EXIT_SUCCESS)
+	6a 00					# push EXIT_SUCCESS
 	eb [ rel8 Exit ]			# jmp Exit
 
 Abort:
-	# exit(EXIT_FAILURE);
-	6a 01					# push $EXIT_FAILURE
+	# exit(EXIT_FAILURE)
+	6a 01					# push EXIT_FAILURE
 
 Exit:
-	5f					# pop %rdi
-	6a 3c					# push $SYS_EXIT
-	58					# pop %rax
+	5f					# pop rdi
+	6a 3c 58				# mov SYS_EXIT rax
 	0f 05					# syscall
